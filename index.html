@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kusingenerator</title>
+    <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <script
+            src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src="kusin.js"></script>
+    <style>
+        #playground {
+            position: relative;
+        }
+        .person  {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+
+        }
+        .person .menu:hover {
+
+        }
+        .female .inner{
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: black;
+        }
+        .male .inner{
+            width: 90px;
+            height: 90px;
+            border-radius: 0%;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<form style="display: none">
+    <p>
+        <label>Andel kusinäktenskap</label>
+        <input id="kusin" name="kusin" type="number">
+    </p>
+    <p><label>Andel dubbelkusiner</label>
+        <input name="dubbelkusiner">
+    </p><p>
+        <label>Antal barn per familj</label>
+        <input max="30" min="1" type="range">
+    </p>
+    <p>
+        <label>Polygami</label>
+        <input type="checkbox">
+    </p>
+</form>
+
+<div style="display: none" class='person female'>
+    <button onclick="addParent(this)">+</button>
+    <div class='inner'></div>
+    <button>+</button>
+</div>
+
+
+<input type="button" value="lägg till hona" onclick="cousinCalc.newIndividual()">
+<input type="button" value="lägg till hane" onclick="cousinCalc.newIndividual('m')">
+
+
+
+<div id="playground">
+    <svg id="svg" style="position: absolute" width="100%" height="100%">
+        <line stroke="black" id="line1"/></svg>
+
+
+</div>
+</body>
+</html>
