@@ -352,3 +352,100 @@ function Person() {
     };
 
 }
+
+
+var findPaths = function(_acc, p) {
+    if (!p) {
+        return [];
+    }
+
+    // Create a new object since javascript uses references as default
+    const acc = _acc.slice();
+
+    acc.push(p.id);
+
+    return [acc].concat(findPaths(acc, p.mother)).concat(findPaths(acc, p.father));
+}
+
+// Check if an array has duplicates
+var hasDuplicates = function (arr) {
+    return new Set(arr).size !== arr.length;
+}
+
+// Find all paths through ancestors between a and b
+var findAncestorPaths = function(a, b) {
+    var result = [];
+    var aPaths = findPaths([], a);
+    var bPaths = findPaths([], b);
+
+    if (aPaths.length > 1 && bPaths.length > 1) {
+        for (const i in aPaths) {
+            // Choose a node to check as common ancestor
+            const nodeToCheck = aPaths[i].slice(-1)[0];
+
+            for (const j in bPaths) {
+                // Find a path which shares the same end node (to test for common ancestor)
+                if (nodeToCheck == bPaths[j].slice(-1)[0]) {
+                    const aPath = aPaths[i].slice(0,-1);
+                    const bPath = bPaths[j].slice(0,-1);
+
+                    console.log('Testing ' + aPaths[i] + ', ' + bPaths[j])
+
+                    // Make sure the paths doesn't share any nodes except last/ancestor
+                    if (!hasDuplicates(aPath.concat(bPath))) {
+                        console.log('Found match: ' + aPaths[i] + ' - ' + bPaths[j]);
+                        result.push(aPath.concat(bPaths[j]));
+                    }
+                }
+            }
+        }
+    } else {
+        // In case one of the nodes is a root node
+        var nodeToCheck;
+        var paths;
+
+        if (aPaths.length == 0) {
+            nodeToCheck = a.id;
+            paths = bPaths;
+        } else {
+            nodeToCheck = b.id;
+            paths = aPaths;
+        }
+
+        for (i in paths) {
+            const path = paths[i];
+            if (nodeToCheck == path.slice(-1)[0]) {
+                console.log('Found match: ' + path + ', ' + nodeToCheck);
+                result.push(path);
+            }
+        }
+    }
+
+    return result;
+}
+
+var coefficientOfRelationship = function(a, b) {
+    console.log("\n");
+    var paths = findAncestorPaths(a, b);
+    var sum = 0;
+
+    console.log("\n");
+
+    for (const i in paths) {
+        const path = paths[i];
+
+        // Generations between a and b
+        const n = path.length - 1;
+
+        // Coefficients of inbreeding, default 1.0
+        const fa = a.f || 0;
+        const fo = b.f || 0;
+
+        const result = Math.pow(2, -n)*Math.pow((1+fa)/(1+fo), 1/2);
+        sum += result;
+
+        console.log("Calculating coefficient for n=" + n, "a=" + a.id, "b=" + b.id, "fa=" + fa, "fo=" + fo, "path=" + path, "result=" + result, "sum=" + sum);
+    }
+
+    return sum;
+}
