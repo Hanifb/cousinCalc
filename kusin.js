@@ -427,17 +427,16 @@ var findAncestorPaths = function(a, b) {
         var nodeToCheck;
         var paths;
 
-        if (aPaths.length == 0) {
+        if (aPaths.length === 0 || bPaths.length > aPaths.length) {
             nodeToCheck = a.id;
             paths = bPaths;
         } else {
             nodeToCheck = b.id;
             paths = aPaths;
         }
-
-        for (i in paths) {
+        for (const i in paths) {
             const path = paths[i];
-            if (nodeToCheck == path.slice(-1)[0]) {
+            if (nodeToCheck === path.slice(-1)[0]) {
                 console.log('Found match: ' + path + ', ' + nodeToCheck);
                 result.push(path);
             }
@@ -456,7 +455,7 @@ var coefficientOfRelationship = function(a, b) {
 
     for (const i in paths) {
         const path = paths[i];
-        
+
         // Generations between a and b
         const n = path.length - 1;
 
