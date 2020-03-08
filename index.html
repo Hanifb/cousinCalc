@@ -23,8 +23,11 @@
             position: absolute;
 
         }
-        .person .menu:hover {
-
+        .person button {
+            display: none;
+        }
+        .person:hover button {
+            display: block;
         }
         .female .inner{
             width: 90px;
@@ -37,6 +40,9 @@
             height: 90px;
             border-radius: 0%;
             background-color: black;
+        }
+        .sel1 {
+            border: 5px solid blue;
         }
     </style>
 </head>
@@ -67,6 +73,8 @@
 
 <input type="button" value="lägg till hona" onclick="cousinCalc.newIndividual()">
 <input type="button" value="lägg till hane" onclick="cousinCalc.newIndividual('m')">
+<input type="button" value="Jämför" onclick="cousinGraph.calculate();">
+
 
 <div style="display: none" class='person female'>
     <button onclick="addParent(this)">+</button>

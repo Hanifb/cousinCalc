@@ -13,6 +13,29 @@
  */
 let cousinGraph = {
 
+    calculate: function(){
+        let person1 = null;
+        let person2 = null;
+      jQuery(".person").click(function () {
+
+          let div1 = jQuery(this);
+          div1.addClass("sel1")
+          person1 = div1.data('person');
+          jQuery(".person").unbind('click');
+
+          jQuery(".person").click(function () {
+                let div2 = jQuery(this);
+                  person2 =  div2.data('person');
+                  jQuery(".person").unbind('click');
+
+              alert( coefficientOfRelationship(person1,person2));
+                jQuery(".person").removeClass("sel1");
+              })
+      });
+
+
+    },
+
     close: function(){
         let line1 = jQuery('#line1');
         line1
@@ -433,13 +456,13 @@ var coefficientOfRelationship = function(a, b) {
 
     for (const i in paths) {
         const path = paths[i];
-
+        
         // Generations between a and b
         const n = path.length - 1;
 
         // Coefficients of inbreeding, default 1.0
-        const fa = a.f || 0;
-        const fo = b.f || 0;
+        const fa = a.f || 1.0;
+        const fo = b.f || 1.0;
 
         const result = Math.pow(2, -n)*Math.pow((1+fa)/(1+fo), 1/2);
         sum += result;
