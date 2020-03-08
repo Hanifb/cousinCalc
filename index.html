@@ -11,8 +11,8 @@
             src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
-
     <script type="text/javascript" src="kusin.js"></script>
+
     <style>
         #playground {
             position: relative;
@@ -68,13 +68,19 @@
 <input type="button" value="lägg till hona" onclick="cousinCalc.newIndividual()">
 <input type="button" value="lägg till hane" onclick="cousinCalc.newIndividual('m')">
 
-
+<div style="display: none" class='person female'>
+    <button onclick="addParent(this)">+</button>
+    <div class='inner'></div>
+    <button>+</button>
+</div>
 
 <div id="playground">
+
     <svg id="svg" style="position: absolute" width="100%" height="100%">
         <line stroke="black" id="line1"/></svg>
 
 
 </div>
+
 </body>
 </html>

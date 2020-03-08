@@ -7,112 +7,14 @@
  */
 
 
-$('.person').draggable();
-
-
-
 /**
  * Hjälpmedel för att visualisera relationerna.
  * @namespace cousinCalc
  */
 let cousinGraph = {
-    removeLine: function(person1, person2){
-        jQuery("."+person1.id +"to"+person2.id).remove();
 
-    },
-
-    createLine: function(person1, person2){
-
-        let line =  document.createElementNS("http://www.w3.org/2000/svg", 'line');
-        line.setAttribute('stroke', 'red');
-        line.setAttribute('class', person1.id +"to"+person2.id +" "+person2.id+"to"+person1.id);
-        line = $(line);
-
-        let pos1 = jQuery("#"+person1.id).position();
-        let pos2 = jQuery("#"+person2.id).position();
-        line
-            .attr('x1', pos1.left)
-            .attr('y1', pos1.top)
-            .attr('x2', pos2.left)
-            .attr('y2', pos2.top);
-        jQuery("#svg").append(line);
-    },
-
-    /**
-     * Visuell hjälpare att koppla ihop individ med en förälder
-     * @param that
-     */
- addParent: function(that){
-    that = jQuery(that.parentNode);
-    let  person =   that.data('person');
-    let pos1 = that.position();
-
-
-    let line1 = jQuery('#line1');
-
-
-    $("#playground").bind('mousemove',function(e){
-        line1
-            .attr('x1', pos1.left)
-            .attr('y1', pos1.top)
-            .attr('x2', e.clientX - 10)
-            .attr('y2', e.clientY - 176);
-
-    });
-
-
-     /**
-      * När man klickar på en visuell representation av en person
-      */
-     jQuery('.person').click(function (e) {
-
-        /**
-         * Skapa ej relation med sig själv.
-         */
-        if(that.is(this)){
-            return;
-        }
-
-        /**
-         * Få tag på den klickade personens Person-objekt
-         * @var otherPerson
-         * @type {Person}
-         */
-        let otherPerson = jQuery(this).data('person');
-
-
-        if(otherPerson.isChildOf(person)) // Kan inte bli förälder till ens förälder.
-            return false;
-
-        person.addParent(otherPerson);
-        otherPerson.addChildren(person);
-
-        if(otherPerson.gender === 'f') {
-            if(person.mother){
-                cousinGraph.removeLine(person.mother, person);
-            }
-        } else {
-            if(person.father){
-                cousinGraph.removeLine(person.father, person);
-            }
-        }
-
-         cousinGraph.createLine(person, otherPerson);
-        close();
-
-    });
-
-    /**
-     *  Escape key
-     * */
-    jQuery('body').keydown(function(e){
-
-        if(e.keyCode === 27){
-            close();
-        }
-    });
-
-    function close() {
+    close: function(){
+        let line1 = jQuery('#line1');
         line1
             .attr('x1', 0)
             .attr('y1', 0)
@@ -121,25 +23,215 @@ let cousinGraph = {
         jQuery("#playground").unbind("mousemove");
         jQuery('body').unbind("keydown")
         jQuery(".person").unbind('click');
-    }
 
-},
+    },
 
+    removeLine: function (parent) {
+        jQuery(".parent_" + parent.id).remove();
+
+    },
+
+    createLines: function (person1) {
+
+        let children = person1.getChildren();
+
+
+        cousinGraph.removeLine(person1);
+
+        for(let i=0; i<children.length;i++){
+
+        let line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+        line.setAttribute('stroke', 'red');
+        line.setAttribute('class', 'parent_'+person1.id);
+        line = $(line);
+           let person1Div = jQuery("#" + person1.id);
+        let pos1 = person1Div.position();
+        let height = person1Div.height();
+        let width = person1Div.width();
+        let pos2 = jQuery("#" + children[i].id).position();
+        line
+            .attr('x1', pos1.left + (width/2))
+            .attr('y1', pos1.top + height)
+            .attr('x2', pos2.left + (width/2))
+            .attr('y2', pos2.top);
+        jQuery("#svg").append(line);
+        }
+    },
+
+    /**
+     * Visuell hjälpare att koppla ihop individ med en förälder
+     * @param that
+     */
+    addParent: function (that) {
+        that = jQuery(that.parentNode);
+        let person = that.data('person');
+        let pos1 = that.position();
+
+
+        let line1 = jQuery('#line1');
+
+
+        $("#playground").bind('mousemove', function (e) {
+            line1
+                .attr('x1', pos1.left)
+                .attr('y1', pos1.top)
+                .attr('x2', e.clientX - 10)
+                .attr('y2', e.clientY - 176);
+
+        });
+
+
+        /**
+         * När man klickar på en visuell representation av en person
+         */
+        jQuery('.person').click(function (e) {
+
+            /**
+             * Skapa ej relation med sig själv.
+             */
+            if (that.is(this)) {
+                return;
+            }
+
+            /**
+             * Få tag på den klickade personens Person-objekt
+             * @var otherPerson
+             * @type {Person}
+             */
+            let otherPerson = jQuery(this).data('person');
+
+
+            if (otherPerson.isChildOf(person)) { // Kan inte bli förälder till ens förälder.
+                console.log('klicked person is already child of indivudal')
+                return false;
+            }
+
+            let oldParents = person.getParents();
+            for(let i=0;i<oldParents.length;i++){
+                if(oldParents[i].gender === otherPerson.gender){
+                    cousinGraph.removeLine(oldParents[i], person);
+                }
+
+            }
+
+            person.addParent(otherPerson);
+            otherPerson.addChildren(person);
+
+            cousinGraph.createLines(otherPerson);
+            cousinGraph.close();
+
+        });
+
+        /**
+         *  Escape key
+         * */
+        jQuery('body').keydown(function (e) {
+
+            if (e.keyCode === 27) {
+                cousinGraph.close();
+            }
+        });
+
+
+    },
+    addChild: function (that) {
+        that = jQuery(that.parentNode);
+        let person = that.data('person');
+        let pos1 = that.position();
+        let line1 = jQuery('#line1');
+
+
+        $("#playground").bind('mousemove', function (e) {
+            line1
+                .attr('x1', pos1.left)
+                .attr('y1', pos1.top)
+                .attr('x2', e.clientX )
+                .attr('y2', e.clientY );
+
+        });
+
+        /**
+         * När man klickar på en visuell representation av en person
+         */
+        jQuery('.person').click(function (e) {
+
+            /**
+             * Skapa ej relation med sig själv.
+             */
+            if (that.is(this)) {
+                return;
+            }
+
+            /**
+             * Få tag på den klickade personens Person-objekt
+             * @var otherPerson
+             * @type {Person}
+             */
+            let otherPerson = jQuery(this).data('person');
+
+            let oldParents = otherPerson.getParents();
+
+            for(let i=0;i<oldParents.length;i++){
+                if(oldParents[i].gender === person.gender){
+                    cousinGraph.removeLine(oldParents[i]);
+                }
+
+            }
+
+            otherPerson.addParent(person);
+            person.addChildren(otherPerson);
+            cousinGraph.createLines(person);
+            cousinGraph.close();
+
+
+
+        });
+        /**
+         *  Escape key
+         * */
+        jQuery('body').keydown(function (e) {
+
+            if (e.keyCode === 27) {
+                cousinGraph.close();
+            }
+        });
+
+        function close() {
+            line1
+                .attr('x1', 0)
+                .attr('y1', 0)
+                .attr('x2', 0)
+                .attr('y2', 0);
+            jQuery("#playground").unbind("mousemove");
+            jQuery('body').unbind("keydown")
+            jQuery(".person").unbind('click');
+        }
+
+    },
     newPerson: function (person) {
 
         let genderClass = person.gender === 'm' ? 'male' : 'female';
 
 
-        let div = $(" <div class='person "+ genderClass +"'>\n" +
-            "        <button onclick=\"cousinGraph.addParent(this)\">+</button>\n" +
-            "        <div class='inner'></div><button>+</button>\n" +
-            "    <button>+</button>\n" +
-            "    </div>");
+        let div = $(" <div class='person " + genderClass + "'>\n" +
+            "<button onclick=\"cousinGraph.addParent(this)\">+</button>\n" +
+            "<div class='inner'></div>\n" +
+            "<button onclick=\"cousinGraph.addChild(this)\">+</button>\n" +
+            "</div>");
 
 
         div.uniqueId();
 
-        div.draggable();
+        div.draggable({stop: function (event, ui) {
+
+                cousinGraph.createLines(person);
+
+                let parents = person.getParents();
+                for(let i=0; i<parents.length;i++){
+                    cousinGraph.createLines(parents[i]);
+                }
+
+            }});
         jQuery(div).hover(function () {
             jQuery(this).addClass("menu");
         }, function () {
@@ -154,7 +246,6 @@ let cousinGraph = {
 };
 
 
-
 /**
  * Detta är hjärtat i kusingeneratorn, här laddar du och kör dina uträkningar.
  * @namespace cousinCalc
@@ -162,67 +253,23 @@ let cousinGraph = {
 let cousinCalc = {
 
     individuals: [],
-    playground:  document.getElementById('playground'),
+    playground: document.getElementById('playground'),
 
-
-
+    /**
+     *  Räknar ut släktskapskofficent för två individer.
+     *
+     *
+     * @param person1
+     * @param person2
+     */
     coeff: function (person1, person2) {
 
-        let ancestors1 = [];
 
-        ancestors1 = ancestors1.concat(person1.getParents());
-        for(let i = 0; i < ancestors1.length; i++){
-           ancestors1 = ancestors1.concat(ancestors1[i].getParents());
-
-            ancestors1 = ancestors1.filter((ancestor, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === ancestor.id
-                ))
-            );
-
-        }
-
-        let ancestors2 = [];
-        ancestors2 = ancestors2.concat(person2.getParents());
-        for(let i = 0; i < ancestors2.length; i++){
-            ancestors2 = ancestors2.concat(ancestors2[i].getParents());
-
-            ancestors2 = ancestors2.filter((ancestor, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === ancestor.id
-                ))
-            );
-
-        }
-
-        console.log(ancestors1, ancestors2);
-        let common = [];
-        for(let i = 0; i < ancestors1.length; i++){
-
-            for(let i2 = 0; i2 < ancestors2.length; i2++) {
-             if(ancestors1[i].id === ancestors2[i].id) {
-                 common = common.concat(ancestors2[i]);
-                }
-            }
-        }
-
-        common = common.filter((ancestor, index, self) =>
-            index === self.findIndex((t) => (
-                t.id === ancestor.id
-            ))
-        );
-
-
-        if(common.length){
-            console.log("Common ancestor found");
-            console.log(common);
-        }
 
     },
 
 
-
-    newIndividual: function(gender = 'f'){
+    newIndividual: function (gender = 'f') {
 
         let person = new Person();
         person.gender = gender;
@@ -230,7 +277,7 @@ let cousinCalc = {
         cousinGraph.newPerson(person);
     },
 
-    createFamily: function(){
+    createFamily: function () {
 
     },
 };
@@ -239,44 +286,66 @@ let cousinCalc = {
  * Objektet som håller all info.
  * @constructor
  */
-function Person()  {
+function Person() {
     this.gender = "f";
     this.father;
     this.mother;
-    this.partner;
     this.children = [];
 
-
-    this.getParents = function(){
-        if(this.father && this.mother)
+    /**
+     *
+     * @returns {[Array]}
+     */
+    this.getParents = function () {
+        if (this.father && this.mother)
             return [this.father, this.mother];
 
-        else if(this.father && !this.mother)
-                return [this.father];
+        else if (this.father && !this.mother)
+            return [this.father];
 
-        else if(!this.father && this.mother)
+        else if (!this.father && this.mother)
             return [this.mother];
 
         return [];
 
     };
 
-    this.addChildren = function(person){
+    /**
+     * Adds children
+     * @param person
+     */
+    this.addChildren = function (person) {
         this.children.push(person);
     };
-
-    this.isChildOf = function(otherperson){
-          return !!((this.mother && this.mother.id === otherperson.id) || (this.father && this.father.id === otherperson.id));
+    this.removeChild = function (person) {
+        this.children = this.children.filter(function(child){
+            return child.id !== person.id;
+        });
+    };
+    this.isChildOf = function (otherperson) {
+        return !!((this.mother && this.mother.id === otherperson.id) || (this.father && this.father.id === otherperson.id));
     };
 
     this.isParentOf = function (otherperson) {
         return !!this.children.find(obj => obj.id === otherperson.id);
 
     };
+    this.getChildren = function(){
+        return this.children;
+    };
+
     this.addParent = function (person) {
-        if(person.gender === "f") {
+
+        //notify old parent of change
+        if (person.gender === "f") {
+            if(this.mother){
+                this.mother.removeChild(this);
+            }
             this.mother = person;
         } else {
+            if(this.father){
+                this.father.removeChild(this);
+            }
             this.father = person
         }
 
